@@ -7,7 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def get_RF_performance(X, y, test_size=0.33, n_splits=10, n_runs=10, plotar_RF=False, feature_names=None, x_scale=5):
+import ossaudiodev
+
+def get_RF_performance(X, y, test_size=0.33, n_splits=10, n_runs=10, plotar_RF=False, feature_names=None, x_scale=5, file_name_no_ext=None):
     # Verificação de dados ausentes em X
     if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series):
         nan_indices_X = X.isnull().any(axis=1)  # Identifica linhas com qualquer NaN em X
@@ -122,28 +124,24 @@ def get_RF_performance(X, y, test_size=0.33, n_splits=10, n_runs=10, plotar_RF=F
     if plotar_RF:
       print(accuracy_max)
       report_df = pd.DataFrame(classification_report_max).transpose()
-      report_df.to_csv(os.path.join(PATH, f'RF{file_name_no_ext}_{y.name}_report_df.csv'))
+      report_df.to_csv(f'{file_name_no_ext}_{y.name}_RF_report_df.csv')
       print(report_df.to_string())
 
       plt.figure(figsize=(8, 6))
       sns.heatmap(confusion_matrix_max, annot=True, fmt='d', cmap='Blues', xticklabels=sorted_labels, yticklabels=sorted_labels)
-      plt.title(f'RF {file_name_no_ext}_{y.name}_Accuracy={accuracy_max:.2f}', fontsize=24)
+      plt.title(f'RF {y.name} Accuracy={accuracy_max:.2f}', fontsize=24)
       plt.xlabel('Predicted', fontsize=14)
       plt.ylabel('True', fontsize=14)
       plt.xticks(fontsize=12)
       plt.yticks(fontsize=12)
-      plt.savefig(os.path.join(PATH, f'RF {file_name_no_ext}_{y.name}_Accuracy={accuracy_max:.2f}'), format='png')
+      plt.savefig(f'{file_name_no_ext}_{y.name}_Accuracy={accuracy_max:.2f}_RF_', format='png')
       plt.show()
       plt.close()
 
-      label_espectro = data.columns.str.split('.').str[0]
       if feature_names is None:
           feature_names = X_clean.columns if isinstance(X_clean, pd.DataFrame) else range(X_clean.shape[1])
 
       importances = rf_model_max.feature_importances_
-      std = np.std([tree.feature_importances_ for tree in rf_model_max.estimators_], axis=0)
-
-      forest_importances = pd.Series(importances, index=feature_names)
 
       # Defina os tamanhos de fonte como variáveis
       font_size_labels = 14
@@ -159,7 +157,7 @@ def get_RF_performance(X, y, test_size=0.33, n_splits=10, n_runs=10, plotar_RF=F
       x_ticks = np.arange(0, len(feature_names), x_scale)#X_acale é o intervalo de X
       x_ticklabels = [feature_names[i] for i in x_ticks]
 
-      sns.barplot(x=feature_names, y=importances, alpha=0.7, ax=ax2, palette=colors)
+      sns.barplot(x=feature_names, y=importances, alpha=0.7, ax=ax2, palette=colors.tolist(), hue=feature_names)
 
       ax1.set_xlabel('Wavenumbers (cm-1)', fontsize=font_size_labels) # se for cm-1
       #ax1.set_xlabel('Wavelengths (nm)', fontsize=font_size_labels) # se for nm
@@ -174,7 +172,7 @@ def get_RF_performance(X, y, test_size=0.33, n_splits=10, n_runs=10, plotar_RF=F
 
 
       fig.tight_layout()
-      plt.savefig(os.path.join(PATH, f'RF_{file_name_no_ext}_{y.name}_feature_importances.png'), format='png')
+      plt.savefig(f'{file_name_no_ext}_{y.name}_RF_feature_importances.png', format='png')
       plt.show()
 
     return accuracy_mean, accuracy_std, accuracy_min, accuracy_max, seed_accuracy_max, sensitivity_mean, sensitivity_std, sensitivity_min, sensitivity_max, specificity_mean, specificity_std, specificity_min, specificity_max

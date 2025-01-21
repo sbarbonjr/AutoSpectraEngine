@@ -2,18 +2,19 @@ import pandas as pd
 import numpy as np
 import os
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
-
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, mean_squared_error, confusion_matrix
 from sklearn.cross_decomposition import PLSRegression
+from sklearn.decomposition import PCA
 
 import seaborn as sns
 
-def plot_PCA(X, Y, combinacao):
+def plot_PCA(X, Y, combinacao, file_name_no_ext):
     # Perform PCA
     pca = PCA(n_components=2)
     components = pca.fit_transform(X)
@@ -31,19 +32,17 @@ def plot_PCA(X, Y, combinacao):
         plt.colorbar(scatter, label='Target Variable (Numeric)')
     else:
         # Y is categorical (labels)
-        categories = np.unique(Y)
+        categories = Y.unique()
         colors = plt.cm.get_cmap('viridis', len(categories))
         for i, category in enumerate(categories):
             plt.scatter(components[Y == category, 0], components[Y == category, 1], color=colors(i), label=str(category))
         plt.legend(title='Target Variable (Categorical)')
 
-    file_name_no_ext = os.path.splitext(file)[0]
-
     # Set labels and title with variance explained
     plt.xlabel(f'PC1 Variance Explained: {explained_variance[0]*100:.2f}%')
     plt.ylabel(f'PC2 Variance Explained: {explained_variance[1]*100:.2f}%')
     plt.title('PCA Plot:'+combinacao)
-    plt.savefig(os.path.join(PATH, f'PCA {file_name_no_ext}_{pre_processamento}'), format='png')
+    plt.savefig(f'{file_name_no_ext}_{combinacao}_PCA.png', format='png')
     plt.show()
     plt.close()
 
@@ -146,7 +145,7 @@ def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=
         plt.legend(fontsize=14)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
-        plt.savefig(f'PLSDA{file_name_no_ext}-{y.name} - RMSECV by LV - {preprocess_name}', format='png')
+        plt.savefig(f'PLSDA{file_name_no_ext}-{y.name} - RMSECV by LV - {preprocess_name}.png', format='png')
         plt.show()
         plt.close()
 
@@ -170,7 +169,7 @@ def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=
         plt.ylabel('True', fontsize=15, labelpad=10)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
-        plt.savefig(f'PLSDA{file_name_no_ext}_{y.name}_Accuracy={accuracy:.2f}', format='png')
+        plt.savefig(f'PLSDA{file_name_no_ext}_{y.name}_Accuracy={accuracy:.2f}.png', format='png')
         plt.show()
         plt.close()
 
@@ -336,7 +335,7 @@ def get_plsda_performance_inverse(X, y, preprocess_name, test_size=0.30, max_com
         plt.legend(fontsize=14)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
-        plt.savefig(os.path.join(PATH, f'PLSDA{file_name_no_ext}-{y.name} - RMSECV by LV - {preprocess_name}'), format='png')
+        plt.savefig(f'{file_name_no_ext}-{y.name} - RMSECV by LV - {preprocess_name}_PLSDA.png', format='png')
         plt.show()
         plt.close()
 
@@ -346,7 +345,7 @@ def get_plsda_performance_inverse(X, y, preprocess_name, test_size=0.30, max_com
 
         print(accuracy)
         report_df = pd.DataFrame(report).transpose()
-        report_df.to_csv(os.path.join(PATH, f'PLSDA{file_name_no_ext}_{y.name}_report_df.csv'))
+        report_df.to_csv(f'{file_name_no_ext}_{y.name}_report_df_PLSDA.csv')
         print(report_df.to_string())
 
         plt.figure(figsize=(8, 6))
@@ -408,5 +407,157 @@ def get_plsda_performance_inverse(X, y, preprocess_name, test_size=0.30, max_com
 
     return best_n_components, accuracy
 
-#TODO: Importar OCPLS
+
+class OneClassPLS:
+    def __init__(self, n_components, inlier_class, n_splits=20, plotar=False, file_name_no_ext="FilePLS", coluna_y_nome="Target"):
+        self.n_components = n_components
+        self.inlier_class = inlier_class
+        self.pls = PLSRegression(n_components=n_components)
+        self.scaler = StandardScaler()
+        self.threshold = None
+        self.n_splits = n_splits
+        self.plotar = plotar
+        self.file_name_no_ext = file_name_no_ext
+        self.coluna_y_nome = coluna_y_nome
+
+    def fit(self, X, y):
+        y = np.array([item.strip() for item in y.tolist()])
+        X_inliers = X[y == self.inlier_class] # Seleciona apenas os dados que pertencem à classe "inlier"
+        X_scaled = self.scaler.fit_transform(X_inliers) # Standardiza os dados
+        self.pls.fit(X_scaled, X_scaled) # Ajusta o modelo final usando todos os dados inliers
+        X_scores = self.pls.transform(X_scaled) # Projeta os dados no espaço latente
+        distances = np.linalg.norm(X_scores, axis=1) # Calcula a distância para o centro no espaço latente
+        self.threshold = np.mean(distances) + 2 * np.std(distances) # Calcula o threshold (média + 2 desvios padrão)
+
+    def predict(self, X):
+        X_scaled = self.scaler.transform(X) # Padronizando a matriz
+        X_scores = self.pls.transform(X_scaled) # Projetando a data no PLS latent space
+        distances = np.linalg.norm(X_scores, axis=1) # Computando a distanca da media no latent space
+        return np.where(distances <= self.threshold, 1, -1) # Classificando como inlier (1) se T² e Q aestao abaixo do thresholds, ou denomina outlier (-1)
+
+    def fit_and_evaluate_full_pipeline(self, df_pp, sub_Ys, coluna_predicao, plotar):
+        # Preparação dos dados
+        sub_Ys = sub_Ys.reset_index(drop=True)
+        df_pp = df_pp.reset_index(drop=True)
+
+        pure_mask = sub_Ys.loc[:, coluna_predicao].str.replace(" ", "") == self.inlier_class.replace(" ", "")
+        non_pure_mask = ~pure_mask
+
+        # Dados inliers
+        X_inliers = df_pp[pure_mask].values
+        y_inliers = sub_Ys.loc[pure_mask, coluna_predicao].values
+
+        # Dados outliers
+        X_outliers = df_pp[non_pure_mask].values
+        y_outliers = sub_Ys.loc[non_pure_mask, coluna_predicao].values
+
+        # Dividir inliers em 80% para treino e 20% para teste
+        X_train_pure, X_test_pure, y_train_pure, y_test_pure = train_test_split(
+            X_inliers, y_inliers, test_size=0.2, random_state=42, shuffle=True
+        )
+
+        # Conjunto de teste: 20% dos inliers + todos os outliers
+        X_test = np.vstack([X_test_pure, X_outliers])
+        y_test = np.hstack([y_test_pure, y_outliers])
+
+        best_sensitivity = 0
+        best_n_components = 2
+        best_accuracy = 0
+        best_specificity = 0
+
+        # Testa diferentes números de componentes e seleciona com base na melhor sensibilidade
+        for n_components in range(2, 11):
+            self.n_components = n_components
+            self.pls = PLSRegression(n_components=n_components)
+
+            # Ajusta o modelo nos dados de treino (inliers) e avalia no conjunto de teste (inliers e outliers)
+            self.fit(X_train_pure, y_train_pure)
+            predictions = self.predict(X_test)
+
+            # Verificação de métricas
+            true_labels = np.where(y_test == self.inlier_class, 1, -1)
+            current_accuracy = np.mean(predictions == true_labels)
+
+            # Calculando Sensibilidade e Especificidade
+            cm = confusion_matrix(true_labels, predictions, labels=[1, -1])
+            sensitivity = cm[0, 0] / (cm[0, 0] + cm[0, 1]) if cm[0, 0] + cm[0, 1] > 0 else 0
+            specificity = cm[1, 1] / (cm[1, 0] + cm[1, 1]) if cm[1, 0] + cm[1, 1] > 0 else 0
+
+            # Guarda o número de componentes que resulta na melhor acuracia
+            if current_accuracy > best_accuracy:
+                best_sensitivity = sensitivity
+                best_n_components = n_components
+                best_accuracy = current_accuracy
+                best_specificity = specificity
+
+        # Usa o melhor número de componentes encontrado
+        self.n_components = best_n_components
+        self.pls = PLSRegression(n_components=best_n_components)
+        self.fit(X_train_pure, y_train_pure)
+
+        if plotar:
+          # Criar matriz de confusão
+          true_labels = np.where(y_test == self.inlier_class, 1, -1)
+          predictions = self.predict(X_test)
+          cm = confusion_matrix(true_labels, predictions)
+
+
+          # Verifique os tamanhos dos arrays
+          print(f"True labels shape: {true_labels.shape}, Predictions shape: {predictions.shape}")
+
+          original_labels = ["Non-Pure", "Pure"]  # Ajustar de acordo com a sua classificação
+
+          # Plotar a matriz de confusão
+          plt.figure(figsize=(8, 6))
+          heatmap = sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                                xticklabels=original_labels, yticklabels=original_labels,
+                                annot_kws={"size": 14})
+
+          # Ajustar os parâmetros da barra de cores
+          colorbar = heatmap.collections[0].colorbar
+          colorbar.ax.tick_params(labelsize=14)
+
+          # Título e rótulos
+          plt.title(f'Best Accuracy={best_accuracy:.2f}', fontsize=16)  # Corrigido para título
+          plt.xlabel('Predicted', fontsize=15)
+          plt.ylabel('True', fontsize=15)
+          plt.xticks(fontsize=14)
+          plt.yticks(fontsize=14)
+
+          # Salvar o gráfico da matriz de confusão
+          plt.savefig(f'{self.file_name_no_ext}_{self.coluna_y_nome}_Best_Accuracy={best_accuracy:.2f}_OneClassPLS.png', format='png')
+          plt.show()
+          plt.close()
+
+          # Exibir amostras incorretamente classificadas
+          incorrect_samples = []
+          for idx, (true_label, pred_label) in enumerate(zip(true_labels, predictions)):
+            if true_label != pred_label:
+                incorrect_sample_info = {
+                    'Index': idx,  # Índice da amostra no conjunto original de dados
+                    'True Label': 'Pure' if true_label == 1 else 'Non-Pure',
+                    'Predicted Label': 'Pure' if pred_label == 1 else 'Non-Pure',
+                    'Column 2 Value': y_test[idx]  # Valor da coluna 2
+                }
+                incorrect_samples.append(incorrect_sample_info)
+
+          if incorrect_samples:
+              print("Amostras classificadas incorretamente:")
+              for sample in incorrect_samples:
+                  print(f"Índice: {sample['Index']}, Rótulo Verdadeiro: {sample['True Label']}, Rótulo Previsto: {sample['Predicted Label']}, Valor da Coluna 2: {sample['Column 2 Value']}")
+
+              column_2_values = [sample['Column 2 Value'] for sample in incorrect_samples]
+              plt.figure(figsize=(10, 6))
+              plt.hist(column_2_values, bins=10, color='skyblue', edgecolor='black')
+              plt.title('Histograma dos Valores da Coluna 2 (Amostras Classificadas Incorretamente)', fontsize=16)
+              plt.xlabel('Valor da Coluna 2', fontsize=14)
+              plt.ylabel('Frequência', fontsize=14)
+              plt.xticks(fontsize=12)
+              plt.yticks(fontsize=12)
+              plt.show()
+              plt.close()
+          else:
+              print("Nenhuma amostra foi classificada incorretamente.")
+        return best_accuracy, best_n_components, best_sensitivity, best_specificity
+
 #TODO: Importar DD-SIMCA
