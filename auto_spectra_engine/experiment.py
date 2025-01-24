@@ -196,11 +196,3 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
         perf_return = [best_n_components, combinacao, round(contamination, 2), round(accuracy, 2)]
     
     return perf_return
-
-
-#file = "/home/barbon/PycharmProjects/AutoSpectraEngine/auto_spectra_engine/datasets/raman.csv"
-file = "/home/barbon/Python/AutoSpectraEngine/auto_spectra_engine/datasets/raman.csv"
-#file = "/home/barbon/Python/AutoSpectraEngine/auto_spectra_engine/datasets/NIR1.csv"
-#print(run_experiment(file, modelo="PLSDA", coluna_predicao="Class", plot=False, verbose=True))
-run_all_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant")
-
