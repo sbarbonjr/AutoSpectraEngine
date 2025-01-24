@@ -1,11 +1,11 @@
 import os
 import pandas as pd
 
-from util import load_data, insert_results_subpath, plot_performance_comparison
-from preprocessing import mean_centering, autoscaling, smoothing, first_derivative, second_derivative, msc, snv, iso_forest_outlier_removal
-from analysis_regression import plot_PCA, get_plsr_performance 
-from analysis_oneclass import OneClassPLS, DDSIMCA
-from analysis_classification import get_RF_performance, get_plsda_performance
+from auto_spectra_engine.util import load_data, insert_results_subpath, plot_performance_comparison
+from auto_spectra_engine.preprocessing import mean_centering, autoscaling, smoothing, first_derivative, second_derivative, msc, snv, iso_forest_outlier_removal
+from auto_spectra_engine.analysis_regression import plot_PCA, get_plsr_performance 
+from auto_spectra_engine.analysis_oneclass import OneClassPLS, DDSIMCA
+from auto_spectra_engine.analysis_classification import get_RF_performance, get_plsda_performance
 
 try:
     # Check if running in a Jupyter Notebook or Colab
@@ -199,8 +199,8 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
 
 
 #file = "/home/barbon/PycharmProjects/AutoSpectraEngine/auto_spectra_engine/datasets/raman.csv"
-file = "/home/barbon/Python/AutoSpectraEngine/auto_spectra_engine/datasets/raman.csv"
+#file = "/home/barbon/Python/AutoSpectraEngine/auto_spectra_engine/datasets/raman.csv"
 #file = "/home/barbon/Python/AutoSpectraEngine/auto_spectra_engine/datasets/NIR1.csv"
 #print(run_experiment(file, modelo="PLSDA", coluna_predicao="Class", plot=False, verbose=True))
-run_all_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant")
+#run_all_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant")
 
