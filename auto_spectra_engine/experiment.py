@@ -21,25 +21,31 @@ import warnings
 from sklearn.exceptions import UndefinedMetricWarning
 warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
-def run_all_experiments(file, modelo="PLSDA", coluna_predicao="Class", test_contamination=False):
-    pipelines = ['mc', 'scal', 'smo', 'd2', 'd1', 'msc', 'snv',
-                #'mc + scal', 'mc + smo', 'mc + d2', 'mc + d1', 'mc + msc', 'mc + snv',
-                #'scal + smo', 'scal + d2', 'scal + d1', 'scal + msc', 'scal + snv',
-                #'smo + d2', 'smo + d1', 'smo + msc', 'smo + snv',
-                #'d2 + msc', 'd2 + snv', 'd1 + msc', 'd1 + snv',
-                #'mc + scal + smo', 'mc + scal + d2', 'mc + scal + d1', 'mc + scal + msc', 'mc + scal + snv',
-                #'mc + smo + d2', 'mc + smo + d1', 'mc + smo + msc', 'mc + smo + snv',
-                #'mc + d2 + msc', 'mc + d2 + snv', 'mc + d1 + msc', 'mc + d1 + snv',
-                #'scal + smo + d2', 'scal + smo + d1', 'scal + smo + msc', 'scal + smo + snv',
-                #'scal + d2 + msc', 'scal + d2 + snv', 'scal + d1 + msc', 'scal + d1 + snv',
-                #'smo + d2 + msc', 'smo + d2 + snv', 'smo + d1 + msc', 'smo + d1 + snv',
-                #'mc + scal + smo + d2', 'mc + scal + smo + d1', 'mc + scal + smo + msc', 'mc + scal + smo + snv',
-                #'mc + scal + d2 + msc', 'mc + scal + d2 + snv', 'mc + scal + d1 + msc', 'mc + scal + d1 + snv',
-                #'mc + smo + d2 + msc', 'mc + smo + d2 + snv', 'mc + smo + d1 + msc', 'mc + smo + d1 + snv',
-                #'scal + smo + d2 + msc', 'scal + smo + d2 + snv', 'scal + smo + d1 + msc', 'scal + smo + d1 + snv',
-                #'mc + scal + smo + d2 + msc', 'mc + scal + smo + d2 + snv', 'mc + scal + smo + d1 + msc', 'mc + scal + smo + d1 + snv'
-                ]
-    
+def run_all_experiments(file, modelo="PLSDA", coluna_predicao="Class", test_contamination=False, pipeline_family='all'):
+
+    if pipeline_family == 'all':
+        pipelines = ['mc', 'scal', 'smo', 'd2', 'd1', 'msc', 'snv',
+                    'mc + scal', 'mc + smo', 'mc + d2', 'mc + d1', 'mc + msc', 'mc + snv',
+                    'scal + smo', 'scal + d2', 'scal + d1', 'scal + msc', 'scal + snv',
+                    'smo + d2', 'smo + d1', 'smo + msc', 'smo + snv',
+                    'd2 + msc', 'd2 + snv', 'd1 + msc', 'd1 + snv',
+                    'mc + scal + smo', 'mc + scal + d2', 'mc + scal + d1', 'mc + scal + msc', 'mc + scal + snv',
+                    'mc + smo + d2', 'mc + smo + d1', 'mc + smo + msc', 'mc + smo + snv',
+                    'mc + d2 + msc', 'mc + d2 + snv', 'mc + d1 + msc', 'mc + d1 + snv',
+                    'scal + smo + d2', 'scal + smo + d1', 'scal + smo + msc', 'scal + smo + snv',
+                    'scal + d2 + msc', 'scal + d2 + snv', 'scal + d1 + msc', 'scal + d1 + snv',
+                    'smo + d2 + msc', 'smo + d2 + snv', 'smo + d1 + msc', 'smo + d1 + snv',
+                    'mc + smo + d2', 'mc + smo + d1', 'mc + smo + msc', 'mc + smo + snv',
+                    'mc + d2 + msc', 'mc + d2 + snv', 'mc + d1 + msc', 'mc + d1 + snv',
+                    'mc + smo + d2 + msc', 'mc + smo + d2 + snv', 'mc + smo + d1 + msc', 'mc + smo + d1 + snv',
+                    'scal + smo + d2 + msc', 'scal + smo + d2 + snv', 'scal + smo + d1 + msc', 'scal + smo + d1 + snv',
+                    'mc + smo + d2 + msc', 'mc + smo + d2 + snv', 'mc + smo + d1 + msc', 'mc + smo + d1 + snv'
+                    ]
+    elif pipeline_family == 'NIR':
+        pipelines = ['mc', 'mc + smo', 'mc + d2', 'mc + d1', 'mc + msc', 'mc + snv']
+    elif pipeline_family == 'Raman':
+        pipelines = ['mc', 'mc + smo', 'mc + d2', 'mc + d1']
+        
     c_contamination=[0]
     if test_contamination:
         c_contamination = [0,0.01,0.025,0.05,0.1]

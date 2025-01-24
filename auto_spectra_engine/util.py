@@ -249,7 +249,7 @@ def plot_performance_comparison(data):
     plt.title("Performance Comparison of Pipelines", fontsize=16)
     plt.xlabel("Pipeline (Combination of LV and Outliers)", fontsize=14)
     plt.ylabel("Performance", fontsize=14)
-    plt.legend(title="Combination", title_fontsize=12, fontsize=10)
+    #plt.legend(title="Combination", title_fontsize=12, fontsize=10)
     plt.xticks(rotation=45, fontsize=10)
     plt.tight_layout()
 
