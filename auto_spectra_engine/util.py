@@ -234,7 +234,7 @@ def plot_performance_comparison(data):
         raise ValueError(f"The DataFrame must contain the following columns: {required_columns}")
 
     # Create a new column for combined LV and Outliers description
-    data['Combination'] = data['LV'] + " | Outliers: " + data['Outliers (c)'].astype(str)
+    data['Combination'] = "Pipeline: " + data['Pipeline'].astype(str) + " | LV: " + data['LV'].astype(str) + " | Outliers: " + data['Outliers (c)'].astype(str)
 
     # Create the bar plot
     plt.figure(figsize=(12, 6))
@@ -243,12 +243,11 @@ def plot_performance_comparison(data):
         x="Pipeline",
         y="Performance",
         hue="Combination",
-        ci=None  # Disable error bars
     )
 
     # Customize plot appearance
     plt.title("Performance Comparison of Pipelines", fontsize=16)
-    plt.xlabel("Pipeline", fontsize=14)
+    plt.xlabel("Pipeline (Combination of LV and Outliers)", fontsize=14)
     plt.ylabel("Performance", fontsize=14)
     plt.legend(title="Combination", title_fontsize=12, fontsize=10)
     plt.xticks(rotation=45, fontsize=10)

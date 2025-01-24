@@ -1,11 +1,11 @@
 import os
 import pandas as pd
 
-from auto_spectra_engine.util import load_data, insert_results_subpath, plot_performance_comparison
-from auto_spectra_engine.preprocessing import mean_centering, autoscaling, smoothing, first_derivative, second_derivative, msc, snv, iso_forest_outlier_removal
-from auto_spectra_engine.analysis_regression import plot_PCA, get_plsr_performance 
-from auto_spectra_engine.analysis_oneclass import OneClassPLS, DDSIMCA
-from auto_spectra_engine.analysis_classification import get_RF_performance, get_plsda_performance
+from util import load_data, insert_results_subpath, plot_performance_comparison
+from preprocessing import mean_centering, autoscaling, smoothing, first_derivative, second_derivative, msc, snv, iso_forest_outlier_removal
+from analysis_regression import plot_PCA, get_plsr_performance 
+from analysis_oneclass import OneClassPLS, DDSIMCA
+from analysis_classification import get_RF_performance, get_plsda_performance
 
 try:
     # Check if running in a Jupyter Notebook or Colab
@@ -23,7 +23,7 @@ warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
 def run_all_experiments(file, modelo="PLSDA", coluna_predicao="Class", test_contamination=False):
     pipelines = ['mc', 'scal', 'smo', 'd2', 'd1', 'msc', 'snv',
-                'mc + scal', 'mc + smo', 'mc + d2', 'mc + d1', 'mc + msc', 'mc + snv',
+                #'mc + scal', 'mc + smo', 'mc + d2', 'mc + d1', 'mc + msc', 'mc + snv',
                 #'scal + smo', 'scal + d2', 'scal + d1', 'scal + msc', 'scal + snv',
                 #'smo + d2', 'smo + d1', 'smo + msc', 'smo + snv',
                 #'d2 + msc', 'd2 + snv', 'd1 + msc', 'd1 + snv',
@@ -49,8 +49,8 @@ def run_all_experiments(file, modelo="PLSDA", coluna_predicao="Class", test_cont
         # Exclude combinations with "d2 + d1" and "msc + snv"
         for c in tqdm(c_contamination, desc='Processing contamination', leave=False):
             result.append(run_experiment(file, modelo=modelo, coluna_predicao=coluna_predicao, contamination=c, combinacao=pipeline, plot=False, verbose=False))
-    result_df = pd.DataFrame(result, columns=["LV", "Outliers (c)", "Pipeline", "Performance"])
-    plot_performance_comparison(result_df, ["LV", "Outliers (c)", "Pipeline", "Performance"])
+    result_df = pd.DataFrame(result, columns=["LV", "Pipeline", "Outliers (c)", "Performance"])
+    plot_performance_comparison(result_df)
 
 
 def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combinacao=None, cortar_extremidades=False, inicio_espectro_col=3, plot=True, modelo="PLSDA", inlier_class="Pure", coluna_predicao=0, verbose=True):
@@ -199,8 +199,8 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
 
 
 #file = "/home/barbon/PycharmProjects/AutoSpectraEngine/auto_spectra_engine/datasets/raman.csv"
-#file = "/home/barbon/Python/AutoSpectraEngine/auto_spectra_engine/datasets/raman.csv"
+file = "/home/barbon/Python/AutoSpectraEngine/auto_spectra_engine/datasets/raman.csv"
 #file = "/home/barbon/Python/AutoSpectraEngine/auto_spectra_engine/datasets/NIR1.csv"
 #print(run_experiment(file, modelo="PLSDA", coluna_predicao="Class", plot=False, verbose=True))
-#run_all_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant")
+run_all_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant")
 
