@@ -2,6 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+import os
+import numpy as np
+from sklearn.utils import shuffle   
+from sklearn.metrics.pairwise import euclidean_distances
+
 def display_general_info(df):
     """
     Exibe informações gerais e estatísticas básicas do DataFrame.
@@ -149,6 +154,24 @@ def kennard_stone_split(X=None, y=None, sample_id=None, test_size=0.3, random_st
         return X_train, X_test, train_label_id, test_label_id
 
 
+def insert_results_subpath(file_path):
+    """
+    Modify a file path by inserting "results" as a subdirectory before the file name.
+
+    Parameters:
+        file_path (str): The original file path.
+
+    Returns:
+        str: The modified file path with "results" added as a subdirectory.
+    """
+    # Get the directory and file name from the original path
+    dir_name, file_name = os.path.split(file_path)
+
+    # Create the new path with the "results" subdirectory
+    new_path = os.path.join(dir_name, "results", file_name.split(".")[0])
+
+    return new_path
+
 def kennard_stone_indices(X, test_size=0.3):
     n_samples = X.shape[0]
 
@@ -195,3 +218,41 @@ def load_data(file_path):
     df = pd.read_csv(file_path)
     df = df.fillna(0)
     return df
+
+def plot_performance_comparison(data):
+    """
+    Plots a bar chart to compare the performance of pipelines using the original columns.
+
+    The plot combines "LV" and "Outliers (c)" to create a more descriptive x-axis for the pipelines.
+
+    Parameters:
+        data (pd.DataFrame): The DataFrame containing the columns ["LV", "Outliers (c)", "Pipeline", "Performance"].
+    """
+    # Ensure the required columns are in the DataFrame
+    required_columns = ["LV", "Outliers (c)", "Pipeline", "Performance"]
+    if not set(required_columns).issubset(data.columns):
+        raise ValueError(f"The DataFrame must contain the following columns: {required_columns}")
+
+    # Create a new column for combined LV and Outliers description
+    data['Combination'] = data['LV'] + " | Outliers: " + data['Outliers (c)'].astype(str)
+
+    # Create the bar plot
+    plt.figure(figsize=(12, 6))
+    sns.barplot(
+        data=data,
+        x="Pipeline",
+        y="Performance",
+        hue="Combination",
+        ci=None  # Disable error bars
+    )
+
+    # Customize plot appearance
+    plt.title("Performance Comparison of Pipelines", fontsize=16)
+    plt.xlabel("Pipeline", fontsize=14)
+    plt.ylabel("Performance", fontsize=14)
+    plt.legend(title="Combination", title_fontsize=12, fontsize=10)
+    plt.xticks(rotation=45, fontsize=10)
+    plt.tight_layout()
+
+    # Show the plot
+    plt.show()

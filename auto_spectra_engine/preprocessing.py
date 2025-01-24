@@ -1,5 +1,8 @@
 import numpy as np
+import pandas as pd
+
 from scipy.signal import savgol_filter 
+from sklearn.ensemble import IsolationForest
 
 def msc(input_data):
     """
@@ -115,6 +118,38 @@ def autoscaling(input_data):
     scaled_data = (input_data - mean_values) / std_values
 
     return scaled_data
+
+def iso_forest_outlier_removal(X, Ys, contamination):
+     # Convert data to DataFrame if it is not already
+    if not isinstance(X, pd.DataFrame):
+        X = pd.DataFrame(X)
+
+    if contamination<=0:
+      return X, Ys
+
+    # Select only numerical columns
+    numerical_columns = X.select_dtypes(include='number').columns
+    numerical_data = X[numerical_columns]
+
+    # Check if there are numerical columns
+    if numerical_data.empty:
+        raise ValueError("No numerical columns found in the input data.")
+
+    # Initialize the Isolation Forest model
+    iso_forest = IsolationForest(contamination=contamination, random_state=42)
+
+    # Fit the model and predict outliers
+    outliers = iso_forest.fit_predict(numerical_data)
+
+    # Filter out the outliers
+    clean_data = X[outliers != -1]
+    clean_targets = Ys[outliers != -1]
+
+    #print('cont x',clean_data.shape) #apenas para checar
+    #print('cont y', clean_targets.shape) #apenas para checar
+
+    return clean_data, clean_targets
+
 
 def iso_forest_outlier_removal(X, Ys, contamination):
      # Convert data to DataFrame if it is not already
