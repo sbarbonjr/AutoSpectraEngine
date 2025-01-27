@@ -42,8 +42,48 @@ cd AutoSpectraEngine
 pip install -r requirements.txt
 ```
 
-## Installation
-### Running Experiments
+## Running Experiments
+
+## Dataset Template - Input CSV File Structure
+
+To use **AutoSpectraEngine**, your input CSV file should follow this structure:
+
+1. **Header Row**: The first row should contain column headers:
+   - The **first column** must contain the **sample IDs**.
+   - Starting from the **second column**, the headers should represent the **wavelengths** (e.g., `500`, `501`, `502`, etc.).
+
+2. **Sample Rows**:
+   - Each subsequent row corresponds to a single sample.
+   - The **first column** contains the **sample ID**.
+   - The remaining columns (under the wavelength headers) contain the **spectral data values** for that sample.
+
+3. **Target Columns**:
+   - The file can include one or more additional columns that represent the **expected target values** for classification or regression tasks.
+   - These target columns can be placed either **before or after the spectral data columns**.
+
+### Example CSV File
+
+Here’s an example of a valid CSV file structure:
+
+| Sample ID | 500   | 501   | 502   | 503   | Class | Concentration |
+|-----------|--------|--------|--------|--------|-------|---------------|
+| Sample1   | 0.123  | 0.456  | 0.789  | 0.101  | A     | 12.5          |
+| Sample2   | 0.321  | 0.654  | 0.987  | 0.202  | B     | 14.8          |
+| Sample3   | 0.231  | 0.564  | 0.897  | 0.303  | A     | 13.2          |
+
+### Key Points to Remember
+- **Sample IDs**: The first column (`Sample ID`) is optional for analysis but useful for tracking individual samples.
+- **Spectral Data**: Columns representing the spectral wavelengths must contain numeric and continuous data.
+- **Target Columns**:
+  - For **classification tasks**, target columns (e.g., `Class`) should contain categorical values.
+  - For **regression tasks**, target columns (e.g., `Concentration`) should contain numeric values.
+- **Empty or Missing Values**: Ensure there are no missing or empty cells in the spectral or target columns.
+
+Following this structure ensures compatibility with **AutoSpectraEngine**'s preprocessing and analysis capabilities.
+
+
+
+## Calling the Experimentation
 
 Use the run_all_experiments function to automate pipeline testing and model evaluation:
 
