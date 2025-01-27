@@ -4,7 +4,7 @@
   <img src="ASNlogo.png" alt="Drag Racing" width="200"/>
 </p>
 
-AutoSpectraEngine is a Python-based platform designed for the analysis of Near-Infrared (NIR) and Raman spectral data. It addresses critical challenges in spectral analysis, such as preprocessing, spectral window optimization, and model hyperparameter tuning, all while automating the entire pipeline.
+AutoSpectraEngine is a Python-based platform developed by the Laboratory of Food Innovation (LINA) at the University of Campinas and the Machine Learning Lab at the University of Trieste. It is designed for the analysis of Near-Infrared (NIR) and Raman spectral data. The platform addresses critical challenges in spectral analysis, including preprocessing, spectral window optimization, and model hyperparameter tuning, all while automating the entire pipeline.
 
 ## Features
 
