@@ -37,7 +37,7 @@ AutoSpectraEngine is a Python-based platform designed for the analysis of Near-I
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/your-repo/AutoSpectraEngine.git
+git clone https://github.com/sbarbonjr/AutoSpectraEngine.git
 cd AutoSpectraEngine
 pip install -r requirements.txt
 ```
