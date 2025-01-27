@@ -32,6 +32,12 @@ AutoSpectraEngine is a Python-based platform developed by the Laboratory of Food
 - **One-Class PLS**: For one-class classification problems.
 - **DDSIMCA**: A robust classification method for discriminant analysis.
 
+### Predefined Spectra pipeline
+
+- **NIR**
+- **eNose**
+- **Raman**
+
 ## Installation
 
 Clone the repository and install dependencies:
