@@ -9,6 +9,8 @@ import seaborn as sns
 from sklearn.model_selection import KFold
 from sklearn.cross_decomposition import PLSRegression
 
+from auto_spectra_engine.util import insert_results_subpath
+
 def get_RF_performance(X, y, test_size=0.33, n_splits=10, n_runs=10, plotar_RF=False, feature_names=None, x_scale=5, file_name_no_ext=None):
     # Verificação de dados ausentes em X
     if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series):
@@ -162,12 +164,12 @@ def get_RF_performance(X, y, test_size=0.33, n_splits=10, n_runs=10, plotar_RF=F
 
 
       fig.tight_layout()
-      plt.savefig(f'{file_name_no_ext}_{y.name}_RF_feature_importances.png', format='png')
+      plt.savefig(f'{insert_results_subpath(file_name_no_ext)}_{y.name}_RF_feature_importances.png', format='png')
       plt.show()
 
     return accuracy_mean, accuracy_std, accuracy_min, accuracy_max, seed_accuracy_max, sensitivity_mean, sensitivity_std, sensitivity_min, sensitivity_max, specificity_mean, specificity_std, specificity_min, specificity_max
 
-def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=20, n_splits=10, label_espectro=[], plotar_plsda=False, x_scale=20, file_name_no_ext="experimento_"):
+def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=20, n_splits=10, label_espectro=[], plotar_plsda=False, file_name_no_ext="experimento_"):
     """
     Evaluate the performance of a PLS-DA model.
 
@@ -183,6 +185,8 @@ def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=
     x_scale (int, optional): Interval for the x-axis ticks in the plots. Default is 20.
     file_name_no_ext (str, optional): Base name for saving the output files. Default is "experimento_".
     """
+    x_scale=20
+
     if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series):
         nan_indices_X = X.isnull().any(axis=1)  # Identifica linhas com qualquer NaN em X
     else:
@@ -270,7 +274,7 @@ def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=
         plt.legend(fontsize=14)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
-        plt.savefig(f'PLSDA{file_name_no_ext}-{y.name} - RMSECV by LV - {preprocess_name}.png', format='png')
+        plt.savefig(f'{insert_results_subpath(file_name_no_ext)}-{y.name} - RMSECV by LV - {preprocess_name}_PLSDA.png', format='png')
         plt.show()
         plt.close()
 
@@ -279,7 +283,7 @@ def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=
         report = classification_report(y_test, y_pred_test_class, target_names=sorted_labels, output_dict=True)
 
         report_df = pd.DataFrame(report).transpose()
-        report_df.to_csv(f'{file_name_no_ext}_{y.name}_report_df_PLSDA.csv')
+        report_df.to_csv(f'{insert_results_subpath(file_name_no_ext)}_{y.name}_report_df_PLSDA.csv')
         #print(report_df.round(2).to_string())
 
         plt.figure(figsize=(8, 6))
@@ -293,7 +297,7 @@ def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=
         plt.ylabel('True', fontsize=15, labelpad=10)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
-        plt.savefig(f'PLSDA{file_name_no_ext}_{y.name}_Accuracy={accuracy:.2f}.png', format='png')
+        plt.savefig(f'{insert_results_subpath(file_name_no_ext)}_{y.name}_Accuracy={accuracy:.2f}_PLSDA.png', format='png')
         plt.show()
         plt.close()
 
@@ -329,7 +333,7 @@ def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=
             plt.yticks(fontsize=20)
 
             # Salva a figura
-            plt.savefig(f'PLSDA_VIP_{file_name_no_ext}_{class_name}.png', format='png')
+            plt.savefig(f'{insert_results_subpath(file_name_no_ext)}_{class_name}_PLSDA_VIP.png', format='png')
             plt.show()
             plt.close()
 
