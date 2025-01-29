@@ -302,21 +302,6 @@ def append_results_to_csv(resultados, columns, file_name):
     - columns: List of column names.
     - file_name: Path to the CSV file.
     """
-    file_exists = os.path.exists(file_name)  
-    resultados_df = pd.DataFrame(resultados, columns=columns)  
-    resultados_df.sort_values(columns[4:], ascending=False).to_csv(
-        file_name, index=False, mode='a', header=not file_exists
-    )  
-
-def append_results_to_csv(resultados, columns, file_name):
-    """
-    Appends results to a CSV file, ensuring headers are written only once.
-
-    Parameters:
-    - resultados: List of result values to be appended.
-    - columns: List of column names.
-    - file_name: Path to the CSV file.
-    """
     file_exists = os.path.exists(file_name)  # Check if file exists
     resultados_df = pd.DataFrame(resultados, columns=columns)  # Convert to DataFrame
     resultados_df.sort_values(columns[4:], ascending=False).to_csv(

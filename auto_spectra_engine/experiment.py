@@ -104,7 +104,7 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
 
     if plot and verbose:
         print("Plotting PCA...")
-        plot_PCA(df_pp.values, sub_Ys.loc[:, coluna_predicao], combinacao, file_name_no_ext)
+        plot_PCA(sub_data.values, sub_Ys.loc[:, coluna_predicao], combinacao, insert_results_subpath(file_name_no_ext))
 
     perf_return = []
     model_results = []
@@ -121,7 +121,7 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
         },
         "PLSDA": {
             "function": get_plsda_performance,
-            "params": (sub_data.values, sub_Ys.loc[:, coluna_predicao], combinacao, 0.33, 20, 10, label_espectro, plot),
+            "params": (sub_data.values, sub_Ys.loc[:, coluna_predicao], combinacao, 0.33, 20, 10, label_espectro, plot, file_name_no_ext),
             "columns": ["file", "cortar_extremidades", "pre_processamento", "contaminacao",
                         "best_n_components", "accuracy", "start_index", "end_index"],
             "sort_by": "accuracy",
@@ -203,7 +203,7 @@ def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipel
 
     # Define the fitness function (maximize performance)
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", list, fitness=creator.FitnessMax)
+    creator.create("Individual", list, fitness=creator.FitnessMax) #TODO: Implementar quando é um problema de minimização
 
     # Individual (Solution) Definition
     def create_individual():
@@ -248,7 +248,7 @@ def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipel
     toolbox.register("select", tools.selBest)  # Selection: Keep best individuals
 
     # Initialize Population
-    pop_size = 30  # Population size
+    pop_size = 20  # Population size
     generations = budget // pop_size  # Number of generations
     population = toolbox.population(n=pop_size)
 
@@ -256,7 +256,7 @@ def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipel
     algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.3, ngen=generations, verbose=True)
 
     # Extract the Best Individual
-    best_individual = tools.selBest(population, k=1)[0]
+    best_individual = tools.selBest(population, k=1)[0] #Restore the three best individuals.
     best_config = {
         "start_index": best_individual[0],
         "end_index": best_individual[1],
