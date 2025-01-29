@@ -256,3 +256,155 @@ def plot_performance_comparison(data):
 
     # Show the plot
     plt.show()
+
+def split_spectrum_from_csv(file_path: str, num_splits: int):
+    """
+    Splits a spectrum into equal column-based intervals from a CSV file.
+
+    Parameters:
+        file_path (str): Path to the CSV file.
+        num_splits (int): Number of splits to be made.
+
+    Returns:
+        list of tuples: A list containing (start_index, end_index) for each slice.
+    """
+    # Load CSV assuming it's a single-row dataset
+    df = pd.read_csv(file_path, header=None, dtype=str)
+    
+    # Flatten the single row into a list
+    num_columns = df.shape[1]  # Get the number of columns
+
+    # Ensure there are enough columns to split
+    if num_splits > num_columns:
+        raise ValueError(f"Number of splits ({num_splits}) is greater than available columns ({num_columns}).")
+
+    # Compute split size
+    step = num_columns // num_splits
+    remainder = num_columns % num_splits  # Handle cases where the columns aren't perfectly divisible
+
+    # Generate the split intervals
+    intervals = []
+    start_idx = 0
+    for i in range(num_splits):
+        end_idx = start_idx + step + (1 if i < remainder else 0)  # Distribute remainder among first splits
+        remainder -= 1 if i < remainder else 0  # Reduce remainder as it's used
+        intervals.append((start_idx, None if i == num_splits - 1 else end_idx))
+        start_idx = end_idx  # Move to the next section
+    
+    return intervals
+
+def append_results_to_csv(resultados, columns, file_name):
+    """
+    Appends results to a CSV file, ensuring headers are written only once.
+
+    Parameters:
+    - resultados: List of result values to be appended.
+    - columns: List of column names.
+    - file_name: Path to the CSV file.
+    """
+    file_exists = os.path.exists(file_name)  
+    resultados_df = pd.DataFrame(resultados, columns=columns)  
+    resultados_df.sort_values(columns[4:], ascending=False).to_csv(
+        file_name, index=False, mode='a', header=not file_exists
+    )  
+
+def append_results_to_csv(resultados, columns, file_name):
+    """
+    Appends results to a CSV file, ensuring headers are written only once.
+
+    Parameters:
+    - resultados: List of result values to be appended.
+    - columns: List of column names.
+    - file_name: Path to the CSV file.
+    """
+    file_exists = os.path.exists(file_name)  # Check if file exists
+    resultados_df = pd.DataFrame(resultados, columns=columns)  # Convert to DataFrame
+    resultados_df.sort_values(columns[4:], ascending=False).to_csv(
+        file_name, index=False, mode='a', header=not file_exists
+    )  # Append results
+
+def plot_all_performances(df):
+    """
+    Plots performance comparisons using bar plots for different pipeline instances,
+    considering Outliers (c) and LV.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame with columns ["LV", "Pipeline", "Outliers (c)", "Performance", "Start Index", "End Index"]
+    """
+    # Create a unique identifier for each pipeline instance
+    df["Pipeline Instance"] = df["Pipeline"] + " (" + df["Start Index"].astype(str) + "-" + df["End Index"].astype(str) + ")"
+
+    # Sort the DataFrame by Performance in descending order
+    df_sorted = df.sort_values(by="Performance", ascending=False)
+
+    # Create the bar plot
+    plt.figure(figsize=(12, 6))
+    ax = sns.barplot(data=df_sorted, x="Pipeline Instance", y="Performance", hue="Start Index", palette="flare")
+
+    # Rotate x-axis labels for better readability
+    plt.xticks(rotation=45, ha='right')
+
+    # Add labels and title
+    plt.xlabel("Pipeline Instance")
+    plt.ylabel("Performance")
+    plt.title("Performance Comparison by Pipeline Instance")
+
+    ax.grid(axis="y", linestyle="--", alpha=0.7)  # Dashed grid lines for clarity
+
+    # Show the plot
+    plt.show()
+
+def get_pipeline_combinations(pipeline_family='all'):
+    # TODO: @ingrid: definir quais as combinações para cada família de pipeline
+    pipelines = ["mc"]
+    if pipeline_family == 'all':
+        pipelines = ['mc', 'scal', 'smo', 'd2', 'd1', 'msc', 'snv',
+                    'mc + scal', 'mc + smo', 'mc + d2', 'mc + d1', 'mc + msc', 'mc + snv',
+                    'scal + smo', 'scal + d2', 'scal + d1', 'scal + msc', 'scal + snv',
+                    'smo + d2', 'smo + d1', 'smo + msc', 'smo + snv',
+                    'd2 + msc', 'd2 + snv', 'd1 + msc', 'd1 + snv',
+                    'mc + scal + smo', 'mc + scal + d2', 'mc + scal + d1', 'mc + scal + msc', 'mc + scal + snv',
+                    'mc + smo + d2', 'mc + smo + d1', 'mc + smo + msc', 'mc + smo + snv',
+                    'mc + d2 + msc', 'mc + d2 + snv', 'mc + d1 + msc', 'mc + d1 + snv',
+                    'scal + smo + d2', 'scal + smo + d1', 'scal + smo + msc', 'scal + smo + snv',
+                    'scal + d2 + msc', 'scal + d2 + snv', 'scal + d1 + msc', 'scal + d1 + snv',
+                    'smo + d2 + msc', 'smo + d2 + snv', 'smo + d1 + msc', 'smo + d1 + snv',
+                    'mc + smo + d2', 'mc + smo + d1', 'mc + smo + msc', 'mc + smo + snv',
+                    'mc + d2 + msc', 'mc + d2 + snv', 'mc + d1 + msc', 'mc + d1 + snv',
+                    'mc + smo + d2 + msc', 'mc + smo + d2 + snv', 'mc + smo + d1 + msc', 'mc + smo + d1 + snv',
+                    'scal + smo + d2 + msc', 'scal + smo + d2 + snv', 'scal + smo + d1 + msc', 'scal + smo + d1 + snv',
+                    'mc + smo + d2 + msc', 'mc + smo + d2 + snv', 'mc + smo + d1 + msc', 'mc + smo + d1 + snv'
+                    ]
+    elif pipeline_family == 'NIR':
+        pipelines = ['mc', 'mc + smo', 'mc + d2', 'mc + d1', 'mc + msc', 'mc + snv']
+    elif pipeline_family == 'Raman':
+        pipelines = ['mc', 'mc + smo', 'mc + d2', 'mc + d1']
+        #pipelines = ['mc']
+    return pipelines
+    
+"""
+result = [
+    [18,"mc",0,0.93,0,395.0],
+    [12,"mc",0,0.96,395,790.0],
+    [10,"mc",0,0.67,790,1184.0],
+    [11,"mc",0,0.78,1184,1578.0],
+    [6,"mc",0,0.81,1578],
+    [18,"mc + smo",0,0.93,0,395.0],
+    [12,"mc + smo",0,0.96,395,790.0],
+    [10,"mc + smo",0,0.67,790,1184.0],
+    [11,"mc + smo",0,0.78,1184,1578.0],
+    [6,"mc + smo",0,0.81,1578],
+    [5,"mc + d2",0,0.63,0,395.0],
+    [14,"mc + d2",0,0.84,395,790.0],
+    [5,"mc + d2",0,0.61,790,1184.0],
+    [18,"mc + d2",0,0.56,1184,1578.0],
+    [2,"mc + d2",0,0.5,1578],
+    [9,"mc + d1",0,0.84,0,395.0],
+    [12,"mc + d1",0,0.95,395,790.0],
+    [10,"mc + d1",0,0.6,790,1184.0],
+    [9,"mc + d1",0,0.72,1184,1578.0],
+    [6,"mc + d1",0,0.75,1578]
+]
+df = pd.DataFrame(result, columns=["LV", "Pipeline", "Outliers (c)", "Performance", "Start Index", "End Index"])
+plot_all_performances(df)
+"""

@@ -1,2 +1,0 @@
-file,cortar_extremidades,pre_processamento,contaminacao,best_n_components,accuracy,start_index,end_index
-/home/barbon/Python/AutoSpectraEngine/auto_spectra_engine/datasets/raman.csv,False,mc+smo+d1,0.0,5,0.97,0,
