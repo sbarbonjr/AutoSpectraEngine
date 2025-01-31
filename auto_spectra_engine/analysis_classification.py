@@ -169,7 +169,7 @@ def get_RF_performance(X, y, test_size=0.33, n_splits=10, n_runs=10, plotar_RF=F
 
     return accuracy_mean, accuracy_std, accuracy_min, accuracy_max, seed_accuracy_max, sensitivity_mean, sensitivity_std, sensitivity_min, sensitivity_max, specificity_mean, specificity_std, specificity_min, specificity_max
 
-def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=20, n_splits=10, label_espectro=[], plotar_plsda=False, file_name_no_ext="experimento_"):
+def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=15, n_splits=10, label_espectro=[], plotar_plsda=False, file_name_no_ext="experimento_"):
     """
     Evaluate the performance of a PLS-DA model.
 
@@ -244,6 +244,7 @@ def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=
             X_train_fold, X_val_fold = X_train[train_index], X_train[val_index]
             y_train_fold, y_val_fold = y_train_ohe[train_index], y_train[val_index]
 
+            print('n_components', n_components)
             plsda = PLSRegression(n_components=n_components)
             plsda.fit(X_train_fold, y_train_fold)
             y_pred = plsda.predict(X_val_fold)
