@@ -121,7 +121,7 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
         },
         "PLSDA": {
             "function": get_plsda_performance,
-            "params": (sub_data.values, sub_Ys.loc[:, coluna_predicao], combinacao, 0.33, 20, 10, label_espectro, plot, file_name_no_ext),
+            "params": (sub_data.values, sub_Ys.loc[:, coluna_predicao], combinacao, 0.33, 18, 10, label_espectro, plot, file_name_no_ext),
             "columns": ["file", "cortar_extremidades", "pre_processamento", "contaminacao",
                         "best_n_components", "accuracy", "start_index", "end_index"],
             "sort_by": "accuracy",
