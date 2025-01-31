@@ -9,9 +9,4 @@ setup(
     version='0.1',
     packages=find_packages(),
     install_requires=read_requirements(),
-    entry_points={
-        'console_scripts': [
-            'your_command=your_module:main_function',
-        ],
-    },
 )
