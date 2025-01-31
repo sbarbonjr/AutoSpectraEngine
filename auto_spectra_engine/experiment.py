@@ -27,7 +27,7 @@ def run_all_experiments(file, modelo="PLSDA", coluna_predicao="Class", use_conta
     pipelines = get_pipeline_combinations(pipeline_family)
     
     if use_contamination is None:
-        c_contamination=[0]
+        use_contamination=[0]
     
     if use_split_spectra == 0:
         use_split_spectra = None
@@ -35,7 +35,7 @@ def run_all_experiments(file, modelo="PLSDA", coluna_predicao="Class", use_conta
     result = []
     for pipeline in tqdm(pipelines, desc='Processing pipelines', leave=False):
         # Exclude combinations with "d2 + d1" and "msc + snv"
-        for c in tqdm(c_contamination, desc='Processing contamination', leave=False):
+        for c in tqdm(use_contamination, desc='Processing contamination', leave=False):
             if use_split_spectra is None:
                 result.append(run_experiment(file, modelo=modelo, coluna_predicao=coluna_predicao, contamination=c, combinacao=pipeline, plot=False, verbose=False))
             else:
