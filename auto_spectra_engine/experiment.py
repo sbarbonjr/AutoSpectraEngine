@@ -237,7 +237,7 @@ def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipel
         combinacao = combinacao_options[combinacao_index]
 
         # Ensure start_index < end_index
-        if start_index >= end_index:
+        if end_index - start_index <= 100:
             return (0.0,)
 
         # Run the experiment
