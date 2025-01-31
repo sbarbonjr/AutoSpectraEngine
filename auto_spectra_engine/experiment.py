@@ -158,14 +158,19 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
 
     if modelo in model_configs:
         model = model_configs[modelo]
-        if verbose: print(f"Executing {modelo}...")
-
+        if verbose:
+            print(f"Executing {modelo}...")
 
         model_results = model["function"](*model["params"])
-        resultados.append([file, cortar_extremidades, combinacao, round(contamination, 2), *map(round, model_results), start_index, end_index])
+        rounded_model_results = [round(x, 2) if isinstance(x, (int, float)) else x for x in model_results]
+        resultados.append([
+            file, cortar_extremidades, combinacao, round(contamination, 2),
+            *rounded_model_results, start_index, end_index
+        ])
         result_file = f"{insert_results_subpath(file_name_no_ext)}_{coluna_predicao}_{model['file_suffix']}"
         append_results_to_csv(resultados, model["columns"], result_file)
-        perf_metric = model_results[-1]
+
+        perf_metric = rounded_model_results[-1] 
 
     perf_return = [model_results[0], combinacao, round(contamination, 2), round(perf_metric, 2), start_index, end_index]
     return perf_return
