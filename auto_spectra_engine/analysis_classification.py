@@ -243,8 +243,6 @@ def get_plsda_performance(X, y, preprocess_name, test_size=0.30, max_components=
         for train_index, val_index in kf.split(X_train):
             X_train_fold, X_val_fold = X_train[train_index], X_train[val_index]
             y_train_fold, y_val_fold = y_train_ohe[train_index], y_train[val_index]
-
-            print('n_components', n_components)
             plsda = PLSRegression(n_components=n_components)
             plsda.fit(X_train_fold, y_train_fold)
             y_pred = plsda.predict(X_val_fold)
