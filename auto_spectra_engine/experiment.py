@@ -242,7 +242,7 @@ def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipel
 
         # Run the experiment
         result = run_experiment(file, start_index=start_index, end_index=end_index, contamination=contamination, combinacao=combinacao, modelo=modelo, coluna_predicao=coluna_predicao, verbose=False, plot=False)
-        print(f"Performance: {result[3]} (Start: {start_index}, End: {end_index}, Contamination: {contamination}, Pipeline: {combinacao})")
+        #print(f"Performance: {result[3]} (Start: {start_index}, End: {end_index}, Contamination: {contamination}, Pipeline: {combinacao})")
         # Extract performance metric (assume last value in result is the score)
         return (result[3],)  # Maximize performance
 
@@ -257,8 +257,14 @@ def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipel
     generations = budget // pop_size  # Number of generations
     population = toolbox.population(n=pop_size)
 
-    # Run Genetic Algorithm
-    algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.3, ngen=generations, verbose=True)
+    with tqdm(total=generations, desc="GA Progress") as pbar:
+        for gen in range(generations):
+            offspring = algorithms.varAnd(population, toolbox, cxpb=0.7, mutpb=0.3)
+            fits = list(map(toolbox.evaluate, offspring))
+            for ind, fit in zip(offspring, fits):
+                ind.fitness.values = fit
+            population[:] = toolbox.select(offspring, k=len(population))
+            pbar.update(1)
 
     # Extract the Best Individual
     best_individual = tools.selBest(population, k=1)[0] #Restore the three best individuals.
