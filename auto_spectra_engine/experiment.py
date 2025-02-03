@@ -212,14 +212,20 @@ def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipel
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMax) #TODO: Implementar quando é um problema de minimização
 
+    def get_random_in_interval(start, end, step=10):
+        return random.randrange(start, end + 1, step)
+
     # Individual (Solution) Definition
     def create_individual():
-        return [
-            random.randint(*START_INDEX_RANGE),
-            random.randint(*END_INDEX_RANGE),
-            round(random.uniform(*CONTAMINATION_RANGE), 2),
-            random.randint(*COMBINACAO_INDEX_RANGE)
-        ]
+        start_index = get_random_in_interval(*START_INDEX_RANGE)
+        min_end_index = start_index + 50
+        max_end_index = END_INDEX_RANGE[1]
+        if min_end_index > max_end_index:
+            raise ValueError("Cannot satisfy the minimum distance constraint. Adjust the ranges.")
+        end_index = get_random_in_interval(min_end_index, max_end_index)
+        contamination = round(random.uniform(*CONTAMINATION_RANGE), 2)
+        combinacao_index = random.randint(*COMBINACAO_INDEX_RANGE)
+        return [start_index, end_index, contamination, combinacao_index]
 
     toolbox = base.Toolbox()
     toolbox.register("individual", tools.initIterate, creator.Individual, create_individual)
