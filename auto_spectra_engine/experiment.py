@@ -9,6 +9,8 @@ from auto_spectra_engine.analysis_regression import plot_PCA, get_plsr_performan
 from auto_spectra_engine.analysis_oneclass import OneClassPLS, DDSIMCA
 from auto_spectra_engine.analysis_classification import get_RF_performance, get_plsda_performance
 
+from multiprocessing import Pool
+
 try:
     # Check if running in a Jupyter Notebook or Colab
     from IPython import get_ipython
@@ -178,7 +180,7 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
 
 
 # Define the function
-def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipeline_family="Raman", budget=100):
+def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipeline_family="Raman", budget=100, use_parallelization=False):
     """
     Uses a Genetic Algorithm (GA) to find the best experimental configuration for spectral analysis.
 
@@ -222,6 +224,11 @@ def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipel
     toolbox = base.Toolbox()
     toolbox.register("individual", tools.initIterate, creator.Individual, create_individual)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    # Parallelization
+    if use_parallelization:
+        pool = Pool()
+    toolbox.register("map", pool.map)
 
     def mutate_individual(individual):
         """Custom mutation function handling both integer and float values."""
