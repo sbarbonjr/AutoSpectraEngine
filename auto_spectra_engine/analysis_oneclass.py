@@ -13,9 +13,9 @@ from scipy.stats import chi2
 
 
 class DDSIMCA:
-    def __init__(self, inlier_class, n_components, alpha=0.05, plotar_DDSIMCA=False, file_name_no_ext="FileDDSIMCA"):
-        self.n_components = n_components
-        self.pca = PCA(n_components=n_components)
+    def __init__(self, inlier_class, max_n_components, alpha=0.05, plotar_DDSIMCA=False, file_name_no_ext="FileDDSIMCA"):
+        self.max_n_components = max_n_components
+        self.pca = PCA(n_components=max_n_components)
         self.scaler = StandardScaler()
         self.alpha = alpha  # Significance level for the Hotelling's T² statistic
         self.threshold_T2 = None
@@ -122,7 +122,7 @@ class DDSIMCA:
         best_accuracy = 0
         best_specificity = 0
 
-        for n_components in range(1, 10):
+        for n_components in range(1, self.max_n_components+1):
             self.n_components = n_components
             self.pca = PCA(n_components=n_components)
 

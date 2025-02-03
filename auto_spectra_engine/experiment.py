@@ -119,7 +119,7 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
                         "best_n_components", "rmse_cal", "rmsecv", "rmse_test", "RPD", "RER",
                         "r2_cal", "r2_cv", "r2_test", "start_index", "end_index"],
             "sort_by": "rmse_test",
-            "file_suffix": "PLSR_Best.csv"
+            "file_suffix": "best_PLSR.csv"
         },
         "PLSDA": {
             "function": get_plsda_performance,
@@ -127,34 +127,34 @@ def run_experiment(file, start_index=0, end_index=None, contamination=0.0, combi
             "columns": ["file", "cortar_extremidades", "pre_processamento", "contaminacao",
                         "best_n_components", "accuracy", "start_index", "end_index"],
             "sort_by": "accuracy",
-            "file_suffix": "PLSDA_Best_.csv"
+            "file_suffix": "best_PLSDA.csv"
         },
         "RF": {
             "function": get_RF_performance,
-            "params": (sub_data.values, sub_Ys.loc[:, coluna_predicao], 0.33, 5, plot, label_espectro, file_name_no_ext),
+            "params": (sub_data.values, sub_Ys.loc[:, coluna_predicao], 0.33, 10, plot, label_espectro, file_name_no_ext),
             "columns": ["file", "cortar_extremidades", "pre_processamento", "contaminacao",
                         "accuracy_mean", "accuracy_std", "accuracy_min", "accuracy_max",
                         "seed_accuracy_max", "sensibility_mean", "sensibility_std",
                         "sensibility_min", "sensibility_max", "specificity_mean",
                         "specificity_std", "specificity_min", "specificity_max", "start_index", "end_index"],
             "sort_by": "accuracy_mean",
-            "file_suffix": "RF_Best_.csv"
+            "file_suffix": "best_RF.csv"
         },
         "OneClassPLS": {
             "function": OneClassPLS(n_components=2, inlier_class=inlier_class, n_splits=3, plotar=plot, file_name_no_ext=file_name_no_ext, coluna_y_nome=coluna_predicao).fit_and_evaluate_full_pipeline,
             "params": (sub_data, sub_Ys, coluna_predicao, plot),
             "columns": ["file", "cortar_extremidades", "pre_processamento", "contaminacao",
-                        "accuracy", "sensitivity", "specificity", "start_index", "end_index", "best_n_components"],
+                        "accuracy", "best_n_components", "sensitivity", "specificity", "start_index", "end_index"],
             "sort_by": "accuracy",
-            "file_suffix": "best_OneClassPLS_.csv"
+            "file_suffix": "best_OneClassPLS.csv"
         },
         "DDSIMCA": {
-            "function": DDSIMCA(n_components=2, inlier_class=inlier_class, plotar_DDSIMCA=plot).fit_and_evaluate_full_pipeline,
+            "function": DDSIMCA(max_n_components=2, inlier_class=inlier_class, plotar_DDSIMCA=plot).fit_and_evaluate_full_pipeline,
             "params": (sub_data, sub_Ys, coluna_predicao),
             "columns": ["file", "cortar_extremidades", "pre_processamento", "contaminacao",
-                        "accuracy", "sensitivity", "specificity", "start_index", "end_index", "best_n_components"],
+                        "accuracy", "best_n_components", "sensitivity", "specificity", "start_index", "end_index"],
             "sort_by": "accuracy",
-            "file_suffix": "best_DDSIMCA_.csv"
+            "file_suffix": "best_DDSIMCA.csv"
         }
     }
 
@@ -234,15 +234,20 @@ def run_ga_experiments(file, modelo="PLSDA", coluna_predicao="Adulterant", pipel
     # Parallelization
     if use_parallelization:
         pool = Pool()
-    toolbox.register("map", pool.map)
+        toolbox.register("map", pool.map)
 
     def mutate_individual(individual):
-        """Custom mutation function handling both integer and float values."""
-        individual[0] = random.randint(*START_INDEX_RANGE)  # start_index (int)
-        individual[1] = random.randint(*END_INDEX_RANGE)  # end_index (int)
+        individual[0] = get_random_in_interval(*START_INDEX_RANGE)  # start_index (multiple of 10)
+        # Ensure end_index is at least 50 greater than start_index
+        min_end_index = individual[0] + 50
+        max_end_index = END_INDEX_RANGE[1]
+        if min_end_index > max_end_index:
+            raise ValueError("Cannot satisfy the minimum distance constraint during mutation. Adjust the ranges.")
+        individual[1] = get_random_in_interval(min_end_index, max_end_index)  # end_index (multiple of 10)
         individual[2] = round(random.uniform(*CONTAMINATION_RANGE), 2)  # contamination (float)
         individual[3] = random.randint(*COMBINACAO_INDEX_RANGE)  # combinacao (int)
         return individual,
+
 
     # Evaluation Function
     def evaluate(individual):

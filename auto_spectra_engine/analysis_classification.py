@@ -11,7 +11,9 @@ from sklearn.cross_decomposition import PLSRegression
 
 from auto_spectra_engine.util import insert_results_subpath
 
-def get_RF_performance(X, y, test_size=0.33, n_splits=10, n_runs=10, plotar_RF=False, feature_names=None, x_scale=5, file_name_no_ext=None):
+def get_RF_performance(X, y, test_size=0.33, n_runs=10, plotar_RF=False, feature_names=None,  file_name_no_ext=None):
+    x_scale=5
+
     # Verificação de dados ausentes em X
     if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series):
         nan_indices_X = X.isnull().any(axis=1)  # Identifica linhas com qualquer NaN em X
